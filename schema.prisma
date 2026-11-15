@@ -1,0 +1,48 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  reviews      CodeReview[]
+}
+
+model CodeReview {
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectName          String
+  language             String
+  sourceCode           String
+  overallScore         Int
+  securityScore        Int
+  performanceScore     Int
+  readabilityScore     Int
+  maintainabilityScore Int
+  reviewSummary        String
+  strengths            String[]
+  recommendations      String[]
+  createdAt            DateTime      @default(now())
+  issues               ReviewIssue[]
+  @@index([userId, createdAt])
+}
+
+model ReviewIssue {
+  id             String     @id @default(cuid())
+  reviewId       String
+  review         CodeReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  category       String
+  severity       String
+  lineNumber     Int?
+  codeSnippet    String
+  recommendation String
+  suggestedFix   String
+  createdAt      DateTime   @default(now())
+  @@index([reviewId])
+}
